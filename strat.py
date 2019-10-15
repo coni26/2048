@@ -1,10 +1,8 @@
-#0:gauche;1:haut;2:droite;3:bas
-
 import numpy
 
 liste=[(0,0),(0,1),(0,2),(0,3),(1,3),(1,2),(1,1),(1,0),(2,0),(2,1),(2,2),(2,3),(3,3),(3,2),(3,1),(3,0)]
 
-def egale(mat1,mat2):
+def egale(mat1, mat2):
     for i in range(4):
         for j in range(4):
             if mat1[(i,j)]!=mat2[(i,j)]:
@@ -28,45 +26,45 @@ def joue_ligne(ligne):
         res.append(0)
     return res
 
-def joue(mat,direction):
-    if direction == 0:
+def joue(mat, direction):
+    if direction == 0:                                              # 0 : gauche
         lines = [joue_ligne(mat[i, :]) for i in range(4)]
         mat = numpy.array(lines)
         return mat
-    elif direction == 1:
+    elif direction == 1:                                            # 1 : haut
         lines = [joue_ligne(mat[:, i]) for i in range(4)]
         mat = numpy.array(lines)
         return mat.T
-    elif direction == 2:
+    elif direction == 2:                                            # 2 : droite
         lines = [list(reversed(joue_ligne(mat[i, ::-1]))) for i in range(4)]
         mat = numpy.array(lines)
         return mat
-    elif direction == 3:
+    elif direction == 3:                                            # 3 : bas
         lines = [list(reversed(joue_ligne(mat[::-1, i]))) for i in range(4)]
         mat = numpy.array(lines)
         return mat.T
 
 def eval_situation(mat):
-    cond=True
+    cond= True
     score=0
     i=0
-    while mat[liste[i]]!=0 and cond:
-        cond=mat[liste[i]]>=mat[liste[i+1]]  
-        score+=mat[liste[i]]**2
-        i+=1 
+    while mat[liste[i]] != 0 and cond:
+        cond=mat[liste[i]] >= mat[liste[i+1]]  
+        score += mat[liste[i]]**2
+        i += 1 
     return score
     
 def eval_situation_2(mat):
-    cond=True
-    score=0
-    i=0
+    cond = True
+    score = 0
+    i = 0
     while mat[liste[i]]!=0 and cond:
         cond=mat[liste[i]]>=mat[liste[i+1]]  
         score+=mat[liste[i]]**2
         i+=1 
-    return score/(compte(mat)**0.009)
+    return score/(compte(mat)**0.01)
     
-def eval_situation_3(mat,max):
+def eval_situation_3(mat, max):
     cond=True
     score=0
     i=0
@@ -128,6 +126,22 @@ def save_3(mat):
                 if buf<min:
                     min,imin=buf,i
     return imin,min
+    
+def perte(mat1,mat2):
+    if compte(mat1)<12:
+        return True
+    cond=True
+    score=0
+    i=0
+    liste1=[]
+    buf=True
+    while mat1[liste[i]]>8 and cond:
+        cond=mat1[liste[i]]>=mat1[liste[i+1]] 
+        liste1.append(mat1[liste[i]])
+        i+=1
+    for i in range(len(liste1)):
+        buf=buf and (mat2[liste[i]]>=liste1[i])
+    return buf
 
 def strategy_2048(game,moves):
     max,imax=0,0
@@ -203,22 +217,22 @@ def strategy_2048_4(game,moves):
 def strategy_2048_5(game,moves):
     max1,max2,imax=0,0,0
     if danger_2(game):
-        #print("danger")
+        print("danger")
         imin,min=save_2(game)
         if min<compte(game):
             return imin
     for i in [1,0,2,3]:
-        mat=joue(game,i)
-        buf1=eval_situation_2(mat)
-        if game[(0,0)]<=mat[(0,0)]:
+        mat = joue(game,i)
+        buf1 = eval_situation_2(mat)
+        if game[(0,0)] <= mat[(0,0)]:
             for j in [1,0,2,3]:
-                buf2=eval_situation_2(joue(mat,j))
-                #print(i,j,buf1,buf2)
-                if buf2>max2:
-                    max1,max2,imax=buf1,buf2,i
-                if buf2==max2:
-                    if buf1>max1:
-                        max1,max2,imax=buf1,buf2,i
+                buf2 = eval_situation_2(joue(mat,j))
+                print(i,j,int(buf1),int(buf2))
+                if buf2 > max2:
+                    max1,max2,imax = buf1,buf2,i
+                if buf2 == max2:
+                    if buf1 > max1:
+                        max1,max2,imax = buf1,buf2,i
     return imax
     
 def strategy_2048_6(game,moves):
@@ -262,4 +276,77 @@ def strategy_2048_7(game,moves):
                 if buf2==max2:
                     if buf1>max1:
                         max1,max2,imax=buf1,buf2,i
+    return imax
+    
+def strategy_2048_8(game,moves):
+    max1,max2,max3,imax=0,0,0,0
+    if danger_2(game):
+        #print("danger")
+        imin,min=save_2(game)
+        if min<compte(game):
+            return imin
+    for i in [1,0,2,3]:
+        mat=joue(game,i)
+        buf1=eval_situation_2(mat)
+        if game[(0,0)]<=mat[(0,0)]:
+            for j in [1,0,2,3]:
+                mat2=joue(mat,j)
+                buf2=eval_situation_2(mat2)
+                #print(i,j,buf1,buf2)
+                for k in [1,0,2,3]:
+                    buf3=eval_situation_2(joue(mat2,k))
+                    if buf3>max3:
+                        max1,max2,max3,imax=buf1,buf2,buf3,i
+                    if buf3==max3:
+                        if buf1>max1:
+                            max1,max2,max3,imax=buf1,buf2,buf3,i
+    return imax
+    
+def strategy_2048_9(game,moves):
+    max1,max2,imax=0,0,0
+    if danger_2(game):
+        print("danger")
+        imin,min=save_2(game)
+        if min<compte(game):
+            return imin
+    for i in [1,0,2,3]:
+        mat=joue(game,i)
+        buf1=eval_situation_2(mat)
+        if game[(0,0)]<=mat[(0,0)]:
+            if compte(game)<=15:
+                for j in [1,0,2,3]:
+                    buf2=eval_situation_2(joue(mat,j))
+                    print(i,j,int(buf1),int(buf2))
+                    if buf2>max2:
+                        max1,max2,imax=buf1,buf2,i
+                    if buf2==max2:
+                        if buf1>max1:
+                            max1,max2,imax=buf1,buf2,i
+            else:
+                if buf1>max1:
+                    max1,imax=buf1,i
+                print('alternatif')
+    return imax
+    
+def strategy_2048_10(game,moves):
+    max1,max2,imax=0,0,0
+    if danger_2(game):
+        #print("danger")
+        imin,min=save_2(game)
+        if min<compte(game):
+            return imin
+    for i in [1,0,2,3]:
+        mat=joue(game,i)
+        buf1=eval_situation_2(mat)
+        if game[(0,0)]<=mat[(0,0)] and perte(game,mat):
+            for j in [1,0,2,3]:
+                buf2=eval_situation_2(joue(mat,j))
+                #print(i,j,int(buf1),int(buf2))
+                if buf2>max2:
+                    max1,max2,imax=buf1,buf2,i
+                if buf2==max2:
+                    if buf1>max1:
+                        max1,max2,imax=buf1,buf2,i
+        #else:
+            #print(i,'perte')
     return imax
