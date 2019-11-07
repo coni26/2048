@@ -1,4 +1,10 @@
 import numpy
+import random
+
+def test_unitaire_numpy(liste):
+    return numpy.array(liste)
+
+test_unitaire_numpy([[0,1],[2,3]]) #exemple de vérification du module numpy
 
 liste=[(0,0),(0,1),(0,2),(0,3),(1,3),(1,2),(1,1),(1,0),(2,0),(2,1),(2,2),(2,3),(3,3),(3,2),(3,1),(3,0)]
 
@@ -8,6 +14,18 @@ def egale(mat1, mat2):
             if mat1[(i,j)]!=mat2[(i,j)]:
                 return False
     return True
+
+def test_unitaire_egale(a,b): #création de deux matrices carrées de taille 4 différentes composées d'entiers de [a,b]
+    A,B=[],[]
+    for k in range(4):
+        for j in range(4):
+            A[i][j]=random.randint(a,b)
+    B,C=A,A
+    C[3][3]=C[3][3]+1
+    return A,B
+
+egale(test_unitaire_egale(1,300)[0],test_unitaire_egale(1,300)[0]) #1 à 300 par exemple, doit retourner True pour tout a,b
+egale(test_unitaire_egale(1,300)[0],test_unitaire_egale(1,300)[1]) #doit retourner False pour tout a,b
 
 def joue_ligne(ligne):
     res = []
@@ -26,6 +44,19 @@ def joue_ligne(ligne):
         res.append(0)
     return res
 
+def test_unitaire_joue_ligne(a,b): #création d'une ligne de longueur 4 composée de puissance de 2 appartenant à [2**a,2**(b-1)]
+    res=[]
+    for k in range(4):
+        n=random.randint(a,b)
+        if n==0:
+            res.append(0)
+        else:
+        res.append(2**n)
+    return res
+
+lgn=test_unitaire_joue_ligne(0,12) #0 et 12 tels que les puissances de 2 aillent jusqu'à 2048 maximum
+joue_ligne(lgn)
+    
 def joue(mat, direction):
     if direction == 0:                                              # 0 : gauche
         lines = [joue_ligne(mat[i, :]) for i in range(4)]
@@ -44,6 +75,17 @@ def joue(mat, direction):
         mat = numpy.array(lines)
         return mat.T
 
+def test_unitaire_joue(a,b): #création d'une matrice de taille 4 composée de puissance de 2 appartenant à [2**a,2**(b-1)]
+    mat=[]
+    for k in range(4):
+        mat.append(test_unitaire_joue_ligne(a,b))
+    return mat
+
+mat=test_unitaire_joue(0,12)
+direction = random.randint(4)
+joue(mat, direction) #affiche la grille en ayant une grille initiale et en translatant dans la direction "direction"
+
+    
 def eval_situation(mat):
     cond= True
     score=0
@@ -53,6 +95,10 @@ def eval_situation(mat):
         score += mat[liste[i]]**2
         i += 1 
     return score
+
+mat=test_unitaire_joue(0,12)
+eval_situation(mat) #compte le nombre de cases rangées dans l'odre croissant (en terme de valeurs) en suivant la structure d'un serpentin (en terme de position, suivre les indices dans liste) 
+
     
 def eval_situation_2(mat):
     cond = True
@@ -84,6 +130,9 @@ def compte(mat):
             compteur+=1
     return compteur
 
+mat=test_unitaire_joue(0,12) 
+compter(mat) #vérifier que cela correspond bien le nombre d'éléments non nuls de la matrice de départ
+
 def danger(mat):
     max=numpy.max(mat)
     if max>=512:
@@ -91,6 +140,9 @@ def danger(mat):
     elif max>=256:
         return compte(mat)>=13
     return compte(mat)>=12
+
+mat=test_unitaire_joue(0,12)
+danger(mat) 
 
 def danger_2(mat):
     max=numpy.max(mat)
@@ -126,7 +178,13 @@ def save_3(mat):
                 if buf<min:
                     min,imin=buf,i
     return imin,min
-    
+
+mat=test_unitaire_joue(0,12)
+A_0,A_1,A_2,A_3=joue(mat,0),joue(mat,1),joue(mat,2),joue(mat,3)
+comp0,comp1,comp2,comp3=compte(A_0),compte(A_1),compte(A_2),compte(A_3)
+save(mat) #vérifier que le minimum des comp est égale à save(mat)[1] et que la direction pour laquelle il est obtenu est save(mat)[0] 
+#pour save_2 il faut définit A_i_j=joue(joue(mat,i),j), i étant la première direction choisie et j la deuxième
+
 def perte(mat1,mat2):
     if compte(mat1)<12:
         return True
