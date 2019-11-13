@@ -1,8 +1,8 @@
 import numpy
 import random
 
-from module.cp2048 import Game2048, GameOverException
-from module.strat_finale import strategy_2048
+from cp2048 import Game2048, GameOverException
+from strat_finale import strategy_2048
 
 
 def test_strategy(fct_strategy, ntries=10):
